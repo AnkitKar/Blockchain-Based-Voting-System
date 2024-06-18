@@ -1,5 +1,3 @@
-# voting_system.py
-
 from blockchain import Blockchain
 
 class VotingSystem:
@@ -12,8 +10,12 @@ class VotingSystem:
 
     def cast_vote(self, voter_id, candidate):
         if voter_id in self.voters:
-            block_index = self.blockchain.new_vote(candidate)
-            return f'Vote recorded in block {block_index}'
+            if self.is_voter_eligible(voter_id):
+                block_index = self.blockchain.new_vote(candidate)
+                self.voters.remove(voter_id)  # Remove voter after casting vote
+                return f'Vote recorded in block {block_index}'
+            else:
+                return 'Voter has already cast a vote.'
         else:
             return 'Voter is not registered.'
 
@@ -27,6 +29,14 @@ class VotingSystem:
                 else:
                     votes[candidate] = 1
         return votes
+
+    def is_voter_eligible(self, voter_id):
+        for block in self.blockchain.chain:
+            for vote in block['votes']:
+                if vote.get('voter_id') == voter_id:
+                    return False
+        return True
+
 
 def main():
     voting_system = VotingSystem()
@@ -47,9 +57,12 @@ def main():
 
         elif choice == '2':
             voter_id = input("Enter your voter ID: ")
-            candidate = input("Enter candidate name: ")
-            result = voting_system.cast_vote(voter_id, candidate)
-            print(result)
+            if voting_system.is_voter_eligible(voter_id):
+                candidate = input("Enter candidate name: ")
+                result = voting_system.cast_vote(voter_id, candidate)
+                print(result)
+            else:
+                print('You have already cast a vote.')
 
         elif choice == '3':
             results = voting_system.count_votes()
@@ -63,6 +76,7 @@ def main():
 
         else:
             print("Invalid choice. Please try again.")
+
 
 if __name__ == "__main__":
     main()
