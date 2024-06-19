@@ -24,11 +24,14 @@ class Blockchain:
         self.chain.append(block)
         return block
 
-    def new_vote(self, candidate):
+    def new_vote(self, voter_id, candidate):
         self.current_votes.append({
+            'voter_id': voter_id,
             'candidate': candidate,
         })
-        return self.last_block['index'] + 1
+        # If you want to create a new block after each vote:
+        self.new_block(proof=12345)
+        return self.last_block['index']
 
     @staticmethod
     def hash(block):
